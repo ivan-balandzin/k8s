@@ -33,6 +33,8 @@ $bootstrap_token = "4vaecq.w6vg0yjs3tefxqnm"
 
 $master_setup = <<SCRIPT
 kubeadm init --apiserver-advertise-address 192.168.100.2 --pod-network-cidr 10.244.0.0/16 --token #{$bootstrap_token}
+kubeadm token delete #{$bootstrap_token}
+kubeadm token create #{$bootstrap_token} --description "Bootstrap token used for joining new nodes" --groups system:bootstrappers:kubeadm:default-node-token --ttl 0 --usages signing,authentication
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -78,18 +80,21 @@ Vagrant.configure('2') do |config|
   end
 end
 
-### cluster init
+### Сluster init
 # cat /dev/urandom | tr -dc 'a-z0-9*23' | fold -w 23 | head -n 1 | sed s/././7
 # kubeadm init --apiserver-advertise-address=192.168.100.2 --pod-network-cidr=10.0.0.0/16
 # mkdir -p $HOME/.kube
 # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 # sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-### Deleting kubeadm
+### Deleting node/cluster
 # kubectl drain master.lab --delete-local-data --force --ignore-daemonsets
 # kubectl delete node master.lab
 # kubectl reset
-### client join
+
+### Сlient join
 # kubeadm join --discovery-token abcdef.1234567890abcdef --discovery-token-unsafe-skip-ca-verification 192.168.100.2:6443
 #
-#
+
+### Bootstrap token
+# kubeadm token create 4vaecq.w6vg0yjs3tefxqnm --description "Bootstrap token used for new nodes" --groups system:bootstrappers:kubeadm:default-node-token --ttl 0 --usages signing,authentication
